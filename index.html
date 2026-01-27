@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZETESIS</title>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      color: #fff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+    .center {
+      height: 100%;
+      display: grid;
+      place-items: center;
+    }
+    .word {
+      font-size: clamp(40px, 8vw, 96px);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    .cursor {
+      display: inline-block;
+      width: 0.6ch;
+      margin-left: 0.2ch;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="center">
+    <div class="word"><span id="out"></span><span class="cursor">▌</span></div>
+  </div>
+
+  <script>
+    const text = "ZETESIS";
+    const out = document.getElementById("out");
+
+    // “Human-ish” delays (milliseconds) per letter:
+    // Slightly slower for I (as you asked), and a bit of variation overall.
+    const delays = {
+      Z: 120,
+      E: 110,
+      T: 115,
+      S: 140,
+      I: 210  // slower (farther key)
+    };
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    let i = 0;
+    function typeNext() {
+      if (i >= text.length) return;
+      const ch = text[i];
+      out.textContent += ch;
+
+      // base delay + tiny randomness
+      const base = delays[ch] ?? 130;
+      const jitter = rand(-25, 35);
+
+      i++;
+      setTimeout(typeNext, Math.max(60, base + jitter));
+    }
+
+    // Start after a tiny pause
+    setTimeout(typeNext, 400);
+  </script>
+</body>
+</html>
