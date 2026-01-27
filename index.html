@@ -37,7 +37,6 @@
     .social-icons {
       position: fixed;
       bottom: 30px;
-      left: 50%;
       display: flex;
       gap: 30px;
     }
@@ -108,8 +107,10 @@
   function typeNext() {
     if (idx >= text.length) {
       // Typing complete - center icons under just "zetesis" (not including cursor)
-      centerIconsUnderText();
-      showIconsSequentially();
+      setTimeout(() => {
+        centerIconsUnderText();
+        showIconsSequentially();
+      }, 100); // Small delay to ensure rendering is complete
       return;
     }
     const ch = text[idx];
@@ -121,15 +122,19 @@
   }
   
   function centerIconsUnderText() {
-    // Get the width of just the "zetesis" text (without cursor)
-    const textWidth = out.getBoundingClientRect().width;
-    const socialWidth = social.getBoundingClientRect().width;
+    // Get the bounding box of just "zetesis" text (without cursor)
+    const textRect = out.getBoundingClientRect();
+    const textCenterX = textRect.left + (textRect.width / 2);
     
-    // Calculate offset: half of text width minus half of social icons width
-    const offset = (textWidth / 2) - (socialWidth / 2);
+    // Get the width of the social icons
+    const socialRect = social.getBoundingClientRect();
+    const socialWidth = socialRect.width;
     
-    // Apply the offset
-    social.style.transform = `translateX(calc(-50% + ${offset}px))`;
+    // Calculate where left edge should be to center the icons under text
+    const leftPosition = textCenterX - (socialWidth / 2);
+    
+    // Set the position
+    social.style.left = `${leftPosition}px`;
   }
   
   function showIconsSequentially() {
