@@ -11,35 +11,55 @@
       background: #000;
       color: #fff;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      overflow: hidden;
     }
+
+    /* Orb canvas background */
+    #orb {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.9;
+    }
+
     .center {
       height: 100%;
       display: grid;
       place-items: center;
+      position: relative;
+      z-index: 1;
     }
+
     .word {
       font-size: clamp(40px, 8vw, 96px);
       letter-spacing: 0.08em;
       white-space: nowrap;
       position: relative;
     }
+
     .cursor {
       display: inline-block;
       width: 0.6ch;
       margin-left: 0.2ch;
       animation: blink 1s step-end infinite;
     }
+
     @keyframes blink {
       50% { opacity: 0; }
     }
-    
+
     /* Social icons styling */
     .social-icons {
       position: fixed;
       bottom: 30px;
       display: flex;
       gap: 30px;
+      z-index: 1;
     }
+
     .social-icons a {
       color: #fff;
       font-size: 32px;
@@ -48,21 +68,34 @@
       opacity: 0;
       transform: translateY(10px);
     }
+
     .social-icons a.show {
       opacity: 1;
       transform: translateY(0);
     }
+
     .social-icons a:hover {
       color: #888;
       transform: translateY(-3px);
     }
+
+    /* Respect user preference */
+    @media (prefers-reduced-motion: reduce) {
+      #orb { display: none; }
+      .cursor { animation: none; }
+      .social-icons a { transition: none; }
+    }
   </style>
 </head>
 <body>
+
+  <!-- Orb Background -->
+  <canvas id="orb"></canvas>
+
   <div class="center">
     <div class="word"><span id="out"></span><span class="cursor">▌</span></div>
   </div>
-  
+
   <!-- Social Icons -->
   <div class="social-icons" id="social">
     <a href="mailto:hey@zetesis.co" title="Email" aria-label="Email" id="icon-0">
@@ -71,12 +104,14 @@
         <path d="M22 7L12 13 2 7"/>
       </svg>
     </a>
-    <a href="https://x.com/heyzetesis" target="_blank" title="Twitter" aria-label="Twitter" id="icon-1">
+
+    <a href="https://x.com/heyzetesis" target="_blank" title="Twitter" aria-label="Twitter" id="icon-1" rel="noopener noreferrer">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
       </svg>
     </a>
-    <a href="https://www.instagram.com/heyzetesis/" target="_blank" title="Instagram" aria-label="Instagram" id="icon-2">
+
+    <a href="https://www.instagram.com/heyzetesis/" target="_blank" title="Instagram" aria-label="Instagram" id="icon-2" rel="noopener noreferrer">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
@@ -85,76 +120,168 @@
     </a>
   </div>
 
-<script>
-  const text = "zetesis";
-  const out = document.getElementById("out");
-  const social = document.getElementById("social");
-  
-  // Slower, gentle "human" typing delays (milliseconds)
-  const delays = {
-    z: 180,
-    e: 170,
-    t: 175,
-    s: 210,
-    i: 260 // a bit slower for "i"
-  };
-  
-  function rand(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-  
-  let idx = 0;
-  function typeNext() {
-    if (idx >= text.length) {
-      // Typing complete - center icons under just "zetesis" (not including cursor)
-      setTimeout(() => {
-        centerIconsUnderText();
-        showIconsSequentially();
-      }, 100); // Small delay to ensure rendering is complete
-      return;
+  <script>
+    /* ========= ORB BACKGROUND (Canvas) ========= */
+    (() => {
+      const canvas = document.getElementById("orb");
+      const ctx = canvas.getContext("2d", { alpha: true });
+
+      let dpr = 1;
+
+      function resize() {
+        dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+        canvas.width = Math.floor(window.innerWidth * dpr);
+        canvas.height = Math.floor(window.innerHeight * dpr);
+        canvas.style.width = window.innerWidth + "px";
+        canvas.style.height = window.innerHeight + "px";
+        // draw in CSS pixels
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+
+      // Smooth-ish oscillation for organic motion
+      function n(t) {
+        return (Math.sin(t) + Math.sin(t * 0.77 + 1.3) + Math.sin(t * 1.31 + 2.1)) / 3;
+      }
+
+      function draw(ms) {
+        const t = ms * 0.001;
+
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // subtle dark wash (keeps glow controlled on black)
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
+        ctx.fillRect(0, 0, W, H);
+
+        const cx = W * (0.5 + 0.08 * n(t * 0.35));
+        const cy = H * (0.45 + 0.08 * n(t * 0.29 + 4));
+        const r = Math.min(W, H) * (0.30 + 0.03 * n(t * 0.6 + 2));
+
+        // main glow
+        let g = ctx.createRadialGradient(cx, cy, r * 0.08, cx, cy, r);
+        g.addColorStop(0.00, "rgba(140,220,255,0.18)");
+        g.addColorStop(0.35, "rgba(120,190,255,0.12)");
+        g.addColorStop(0.60, "rgba(180,140,255,0.10)");
+        g.addColorStop(1.00, "rgba(0,0,0,0)");
+
+        ctx.globalCompositeOperation = "screen";
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // secondary depth glow
+        const cx2 = cx + r * 0.22 * n(t * 0.5 + 9);
+        const cy2 = cy + r * 0.16 * n(t * 0.42 + 6);
+
+        let g2 = ctx.createRadialGradient(cx2, cy2, r * 0.07, cx2, cy2, r * 0.95);
+        g2.addColorStop(0.00, "rgba(255,180,220,0.10)");
+        g2.addColorStop(0.35, "rgba(140,255,210,0.08)");
+        g2.addColorStop(1.00, "rgba(0,0,0,0)");
+
+        ctx.fillStyle = g2;
+        ctx.beginPath();
+        ctx.arc(cx2, cy2, r * 0.95, 0, Math.PI * 2);
+        ctx.fill();
+
+        // very subtle grain (cheap, but nice on black)
+        ctx.globalCompositeOperation = "overlay";
+        const img = ctx.getImageData(0, 0, W, H);
+        const data = img.data;
+        const strength = 10; // reduce to 6 if you want less grain
+
+        for (let i = 0; i < data.length; i += 4) {
+          const v = (Math.random() - 0.5) * strength;
+          data[i] += v;
+          data[i + 1] += v;
+          data[i + 2] += v;
+        }
+        ctx.putImageData(img, 0, 0);
+
+        ctx.globalCompositeOperation = "source-over";
+        requestAnimationFrame(draw);
+      }
+
+      requestAnimationFrame(draw);
+    })();
+
+
+    /* ========= YOUR EXISTING TYPING + ICONS ========= */
+    const text = "zetesis";
+    const out = document.getElementById("out");
+    const social = document.getElementById("social");
+
+    // Slower, gentle "human" typing delays (milliseconds)
+    const delays = {
+      z: 180,
+      e: 170,
+      t: 175,
+      s: 210,
+      i: 260 // a bit slower for "i"
+    };
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
     }
-    const ch = text[idx];
-    out.textContent += ch;
-    const base = delays[ch] ?? 190;
-    const jitter = rand(-15, 35);
-    idx++;
-    setTimeout(typeNext, Math.max(120, base + jitter));
-  }
-  
-  function centerIconsUnderText() {
-    // Get the bounding box of just "zetesis" text (without cursor)
-    const textRect = out.getBoundingClientRect();
-    const textCenterX = textRect.left + (textRect.width / 2);
-    
-    // Get the width of the social icons
-    const socialRect = social.getBoundingClientRect();
-    const socialWidth = socialRect.width;
-    
-    // Calculate where left edge should be to center the icons under text
-    const leftPosition = textCenterX - (socialWidth / 2);
-    
-    // Set the position
-    social.style.left = `${leftPosition}px`;
-  }
-  
-  function showIconsSequentially() {
-    const icons = [
-      document.getElementById('icon-0'),
-      document.getElementById('icon-1'),
-      document.getElementById('icon-2')
-    ];
-    
-    // Delay before first icon appears
-    let delay = 800;
-    
-    icons.forEach((icon, index) => {
-      setTimeout(() => {
-        icon.classList.add('show');
-      }, delay + (index * 600)); // 600ms gap between each icon
-    });
-  }
-  
-  setTimeout(typeNext, 600);
-</script>
+
+    let idx = 0;
+    function typeNext() {
+      if (idx >= text.length) {
+        // Typing complete - center icons under just "zetesis" (not including cursor)
+        setTimeout(() => {
+          centerIconsUnderText();
+          showIconsSequentially();
+        }, 100); // Small delay to ensure rendering is complete
+        return;
+      }
+      const ch = text[idx];
+      out.textContent += ch;
+      const base = delays[ch] ?? 190;
+      const jitter = rand(-15, 35);
+      idx++;
+      setTimeout(typeNext, Math.max(120, base + jitter));
+    }
+
+    function centerIconsUnderText() {
+      // Get the bounding box of just "zetesis" text (without cursor)
+      const textRect = out.getBoundingClientRect();
+      const textCenterX = textRect.left + (textRect.width / 2);
+
+      // Get the width of the social icons
+      const socialRect = social.getBoundingClientRect();
+      const socialWidth = socialRect.width;
+
+      // Calculate where left edge should be to center the icons under text
+      const leftPosition = textCenterX - (socialWidth / 2);
+
+      // Set the position
+      social.style.left = `${leftPosition}px`;
+    }
+
+    function showIconsSequentially() {
+      const icons = [
+        document.getElementById('icon-0'),
+        document.getElementById('icon-1'),
+        document.getElementById('icon-2')
+      ];
+
+      // Delay before first icon appears
+      let delay = 800;
+
+      icons.forEach((icon, index) => {
+        setTimeout(() => {
+          icon.classList.add('show');
+        }, delay + (index * 600)); // 600ms gap between each icon
+      });
+    }
+
+    setTimeout(typeNext, 600);
+  </script>
+
 </body>
 </html>
