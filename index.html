@@ -21,6 +21,7 @@
       font-size: clamp(40px, 8vw, 96px);
       letter-spacing: 0.08em;
       white-space: nowrap;
+      position: relative;
     }
     .cursor {
       display: inline-block;
@@ -37,7 +38,6 @@
       position: fixed;
       bottom: 30px;
       left: 50%;
-      transform: translateX(-50%);
       display: flex;
       gap: 30px;
     }
@@ -89,6 +89,7 @@
 <script>
   const text = "zetesis";
   const out = document.getElementById("out");
+  const social = document.getElementById("social");
   
   // Slower, gentle "human" typing delays (milliseconds)
   const delays = {
@@ -106,7 +107,8 @@
   let idx = 0;
   function typeNext() {
     if (idx >= text.length) {
-      // Typing complete - show social icons one by one
+      // Typing complete - center icons under just "zetesis" (not including cursor)
+      centerIconsUnderText();
       showIconsSequentially();
       return;
     }
@@ -116,6 +118,18 @@
     const jitter = rand(-15, 35);
     idx++;
     setTimeout(typeNext, Math.max(120, base + jitter));
+  }
+  
+  function centerIconsUnderText() {
+    // Get the width of just the "zetesis" text (without cursor)
+    const textWidth = out.getBoundingClientRect().width;
+    const socialWidth = social.getBoundingClientRect().width;
+    
+    // Calculate offset: half of text width minus half of social icons width
+    const offset = (textWidth / 2) - (socialWidth / 2);
+    
+    // Apply the offset
+    social.style.transform = `translateX(calc(-50% + ${offset}px))`;
   }
   
   function showIconsSequentially() {
