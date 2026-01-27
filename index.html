@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html><!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -31,18 +31,71 @@
     @keyframes blink {
       50% { opacity: 0; }
     }
+    
+    /* Social icons styling */
+    .social-icons {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 30px;
+    }
+    .social-icons a {
+      color: #fff;
+      font-size: 32px;
+      transition: color 0.3s ease, transform 0.3s ease, opacity 0.8s ease;
+      text-decoration: none;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .social-icons a.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .social-icons a:hover {
+      color: #888;
+      transform: translateY(-3px);
+    }
   </style>
 </head>
 <body>
   <div class="center">
     <div class="word"><span id="out"></span><span class="cursor">▌</span></div>
   </div>
+  
+  <!-- Social Icons -->
+  <div class="social-icons" id="social">
+    <a href="mailto:hey@zetesis.co" title="Email" aria-label="Email" id="icon-0">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="M22 7L12 13 2 7"/>
+      </svg>
+    </a>
+    <a href="https://x.com/heyzetesis" target="_blank" title="Twitter" aria-label="Twitter" id="icon-1">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+      </svg>
+    </a>
+    <a href="https://www.instagram.com/heyzetesis/" target="_blank" title="Instagram" aria-label="Instagram" id="icon-2">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+      </svg>
+    </a>
+    <a href="https://www.reddit.com/r/heyzetesis/" target="_blank" title="Reddit" aria-label="Reddit" id="icon-3">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
+      </svg>
+    </a>
+  </div>
 
 <script>
   const text = "zetesis";
   const out = document.getElementById("out");
-
-  // Slower, gentle “human” typing delays (milliseconds)
+  
+  // Slower, gentle "human" typing delays (milliseconds)
   const delays = {
     z: 180,
     e: 170,
@@ -50,28 +103,45 @@
     s: 210,
     i: 260 // a bit slower for "i"
   };
-
+  
   function rand(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   }
-
+  
   let idx = 0;
-
   function typeNext() {
-    if (idx >= text.length) return;
-
+    if (idx >= text.length) {
+      // Typing complete - show social icons one by one
+      showIconsSequentially();
+      return;
+    }
     const ch = text[idx];
     out.textContent += ch;
-
     const base = delays[ch] ?? 190;
-    const jitter = rand(-15, 35); // small randomness, still calm
+    const jitter = rand(-15, 35);
     idx++;
-
     setTimeout(typeNext, Math.max(120, base + jitter));
   }
-
-  setTimeout(typeNext, 600); // small delay before starting
+  
+  function showIconsSequentially() {
+    const icons = [
+      document.getElementById('icon-0'),
+      document.getElementById('icon-1'),
+      document.getElementById('icon-2'),
+      document.getElementById('icon-3')
+    ];
+    
+    // Delay before first icon appears
+    let delay = 800;
+    
+    icons.forEach((icon, index) => {
+      setTimeout(() => {
+        icon.classList.add('show');
+      }, delay + (index * 600)); // 600ms gap between each icon
+    });
+  }
+  
+  setTimeout(typeNext, 600);
 </script>
 </body>
 </html>
-
