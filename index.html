@@ -38,40 +38,40 @@
     <div class="word"><span id="out"></span><span class="cursor">▌</span></div>
   </div>
 
-  <script>
-    const text = "ZETESIS";
-    const out = document.getElementById("out");
+<script>
+  const text = "zetesis";
+  const out = document.getElementById("out");
 
-    // “Human-ish” delays (milliseconds) per letter:
-    // Slightly slower for I (as you asked), and a bit of variation overall.
-    const delays = {
-      Z: 120,
-      E: 110,
-      T: 115,
-      S: 140,
-      I: 210  // slower (farther key)
-    };
+  // Slower, gentle “human” typing delays (milliseconds)
+  const delays = {
+    z: 180,
+    e: 170,
+    t: 175,
+    s: 210,
+    i: 260 // a bit slower for "i"
+  };
 
-    function rand(min, max) {
-      return Math.floor(Math.random() * (max - min + 1)) + min;
-    }
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
 
-    let i = 0;
-    function typeNext() {
-      if (i >= text.length) return;
-      const ch = text[i];
-      out.textContent += ch;
+  let idx = 0;
 
-      // base delay + tiny randomness
-      const base = delays[ch] ?? 130;
-      const jitter = rand(-25, 35);
+  function typeNext() {
+    if (idx >= text.length) return;
 
-      i++;
-      setTimeout(typeNext, Math.max(60, base + jitter));
-    }
+    const ch = text[idx];
+    out.textContent += ch;
 
-    // Start after a tiny pause
-    setTimeout(typeNext, 400);
-  </script>
+    const base = delays[ch] ?? 190;
+    const jitter = rand(-15, 35); // small randomness, still calm
+    idx++;
+
+    setTimeout(typeNext, Math.max(120, base + jitter));
+  }
+
+  setTimeout(typeNext, 600); // small delay before starting
+</script>
 </body>
 </html>
+
