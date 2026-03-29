@@ -4,6 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>zetesis</title>
+
+<!-- Open Graph / share preview -->
+<meta property="og:type"        content="website">
+<meta property="og:url"         content="https://zetesis.co/">
+<meta property="og:title"       content="zetesis">
+<meta property="og:description" content="ζήτησις — inquiry. investigation. the act of seeking.">
+<meta property="og:image"       content="https://zetesis.co/og.png">
+
+<!-- Twitter / X card -->
+<meta name="twitter:card"        content="summary_large_image">
+<meta name="twitter:url"         content="https://zetesis.co/">
+<meta name="twitter:title"       content="zetesis">
+<meta name="twitter:description" content="ζήτησις — inquiry. investigation. the act of seeking.">
+<meta name="twitter:image"       content="https://zetesis.co/og.png">
+
+<!-- Plain meta description (search engines) -->
+<meta name="description" content="ζήτησις — inquiry. investigation. the act of seeking.">
+
+<!-- Favicon: inline SVG rendered as a gold "z" -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230e0d0b'/><text y='.9em' font-size='72' font-family='Georgia,serif' fill='%23c8a96e' x='50%25' text-anchor='middle' dominant-baseline='hanging' dy='8'>z</text></svg>">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
@@ -15,6 +36,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: none; /* hide mouse cursor for immersive feel */
   }
   #wordmark {
     font-family: 'DM Sans', sans-serif;
@@ -47,57 +69,47 @@
 <div id="wordmark"><span id="text"></span><span id="cursor"></span></div>
 <script>
   const textEl = document.getElementById('text');
-
   function render(chars) {
     textEl.innerHTML = chars.map(c =>
       c.gold ? `<span class="mark">${c.char}</span>` : c.char
     ).join('');
   }
-
   const wait = ms => new Promise(r => setTimeout(r, ms));
   const TYPE  = 120;
   const BACK  = 90;
   const PAUSE = 1400;
   const GAP   = 110;
-
   async function typeEnd(cur, str, gold = false) {
     for (const ch of str) {
       cur.push({ char: ch, gold }); render(cur); await wait(TYPE);
     }
   }
-
   async function backspace(cur, n) {
     for (let i = 0; i < n; i++) {
       cur.pop(); render(cur); await wait(BACK); await wait(GAP);
     }
   }
-
   async function run() {
     while (true) {
       let cur = [];
-
       // 1. zetesis
       await typeEnd(cur, 'zetesis');
       await wait(PAUSE);
-
-      // 2. backspace tesis + t (5) → ze, type /esis → ze/esis
+      // 2. backspace tesis (5) → ze, type /esis → ze/esis
       await backspace(cur, 5);
       cur.push({ char: '/', gold: true }); render(cur); await wait(TYPE);
       await typeEnd(cur, 'esis');
       await wait(PAUSE);
-
       // 3. backspace /esis (5) → ze, type \esis → ze\esis
       await backspace(cur, 5);
       cur.push({ char: '\\', gold: true }); render(cur); await wait(TYPE);
       await typeEnd(cur, 'esis');
       await wait(PAUSE);
-
       // 4. clear
       while (cur.length > 0) { cur.pop(); render(cur); await wait(BACK); }
       await wait(600);
     }
   }
-
   run();
 </script>
 </body>
