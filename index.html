@@ -20,6 +20,7 @@
 
   html, body {
     height: 100%;
+    overflow: hidden;
     background: var(--paper);
     color: var(--ink);
     font-family: 'EB Garamond', Georgia, serif;
@@ -27,15 +28,14 @@
   }
 
   body {
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     flex-direction: column;
   }
 
   nav {
-    padding: 2rem 4rem;
-    display: flex;
-    align-items: baseline;
+    padding: 2rem 4rem 0;
+    flex-shrink: 0;
   }
 
   .wordmark {
@@ -44,26 +44,9 @@
     font-size: 1.05rem;
     letter-spacing: 0.04em;
     color: var(--ink);
-    min-width: 9ch;
     user-select: none;
-  }
-
-  .cursor {
     display: inline-block;
-    width: 1px;
-    height: 1.1em;
-    background: var(--ink);
-    margin-left: 1px;
-    vertical-align: text-bottom;
-    animation: blink 1.1s step-end infinite;
-    opacity: 0;
-  }
-
-  .cursor.active { opacity: 1; }
-
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
+    min-width: 9ch;
   }
 
   main {
@@ -71,7 +54,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 0 4rem 6rem;
+    padding: 0 4rem 4rem;
+    min-height: 0;
   }
 
   .rule-top {
@@ -79,6 +63,7 @@
     height: 1px;
     background: var(--ink-muted);
     margin-bottom: 2.5rem;
+    flex-shrink: 0;
   }
 
   .heading-block {
@@ -86,6 +71,7 @@
     align-items: center;
     gap: 1.5rem;
     margin-bottom: 1.8rem;
+    flex-shrink: 0;
   }
 
   .th-box {
@@ -133,6 +119,7 @@
     height: 1px;
     background: var(--rule);
     margin-bottom: 2.2rem;
+    flex-shrink: 0;
   }
 
   .body-text {
@@ -141,8 +128,6 @@
     line-height: 1.85;
     color: var(--ink-muted);
     font-weight: 400;
-    columns: 2;
-    column-gap: 5rem;
   }
 
   .body-text em {
@@ -151,8 +136,9 @@
   }
 
   footer {
-    padding: 1.5rem 4rem;
+    padding: 1.25rem 4rem;
     border-top: 1px solid var(--rule);
+    flex-shrink: 0;
   }
 
   .footer-text {
@@ -162,19 +148,12 @@
     color: var(--ink-faint);
     letter-spacing: 0.08em;
   }
-
-  @media (max-width: 800px) {
-    nav, main, footer { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .body-text { columns: 1; font-size: 1.2rem; }
-    .th-box { width: 5.5rem; height: 5.5rem; }
-    .th-symbol { font-size: 3rem; }
-  }
 </style>
 </head>
 <body>
 
 <nav>
-  <span class="wordmark" id="wordmark"></span><span class="cursor" id="cursor"></span>
+  <span class="wordmark" id="wordmark"></span>
 </nav>
 
 <main>
@@ -193,11 +172,7 @@
   <div class="divider"></div>
 
   <p class="body-text">
-    An element discovered twice — first by mistake, then in truth.
-    Thorium is <em>fertile, not fissile</em>: it cannot burn alone,
-    but given a neutron and the right conditions, it transforms into
-    fuel enough to power civilisation for a thousand years.
-    The world is only beginning to ask whether it should.
+    An element discovered twice — first by mistake, then in truth. Thorium is <em>fertile, not fissile</em>: it cannot burn alone, but given a neutron and the right conditions, it transforms into fuel enough to power civilisation for a thousand years. The world is only beginning to ask whether it should.
   </p>
 </main>
 
@@ -207,7 +182,6 @@
 
 <script>
   const el = document.getElementById('wordmark');
-  const cursor = document.getElementById('cursor');
 
   const TYPE_SPEED = 80;
   const BACK_SPEED = 55;
@@ -220,7 +194,6 @@
   }
 
   async function typeText(text, from) {
-    cursor.classList.add('active');
     for (let i = from.length; i <= text.length; i++) {
       el.textContent = text.slice(0, i);
       await sleep(TYPE_SPEED + (Math.random() * 30 - 15));
@@ -228,38 +201,31 @@
   }
 
   async function backspace(text, keepN) {
-    cursor.classList.add('active');
     for (let i = text.length; i > keepN; i--) {
       el.textContent = text.slice(0, i - 1);
       await sleep(BACK_SPEED + (Math.random() * 20 - 10));
     }
-    return text.slice(0, keepN);
   }
 
   async function animate() {
     while (true) {
       el.textContent = '';
-      cursor.classList.add('active');
       await sleep(300);
 
       await typeText('zetesis', '');
-      cursor.classList.remove('active');
       await sleep(PAUSE_FULL);
 
       await backspace('zetesis', 2);
       await sleep(180);
       await typeText('ze/esis', 'ze');
-      cursor.classList.remove('active');
       await sleep(PAUSE_STATE);
 
       await backspace('ze/esis', 2);
       await sleep(180);
       await typeText('ze\\esis', 'ze');
-      cursor.classList.remove('active');
       await sleep(PAUSE_STATE);
 
       await backspace('ze\\esis', 0);
-      cursor.classList.remove('active');
       await sleep(PAUSE_BEFORE_RESTART);
     }
   }
