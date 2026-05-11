@@ -153,6 +153,69 @@
     color: var(--ink-faint);
     letter-spacing: 0.08em;
   }
+
+  /* ── MOBILE ── */
+  @media (max-width: 768px) {
+    html, body {
+      height: auto;
+      overflow: auto;
+    }
+
+    body {
+      height: auto;
+      min-height: 100vh;
+    }
+
+    nav {
+      height: auto;
+      min-height: 4rem;
+      padding: 1.5rem 1.75rem;
+    }
+
+    main {
+      flex: none;
+      justify-content: flex-start;
+      padding: 2rem 1.75rem 3rem;
+    }
+
+    .rule-top {
+      margin-bottom: 2rem;
+    }
+
+    .th-box {
+      width: 5.5rem;
+      height: 5.5rem;
+    }
+
+    .th-symbol {
+      font-size: 3rem;
+    }
+
+    .th-name {
+      font-size: 1rem;
+    }
+
+    .th-number {
+      font-size: 0.7rem;
+    }
+
+    .heading-block {
+      margin-bottom: 1.5rem;
+    }
+
+    .divider {
+      margin-bottom: 1.75rem;
+    }
+
+    .body-text {
+      font-size: 1.2rem;
+      line-height: 1.8;
+    }
+
+    footer {
+      padding: 1.25rem 1.75rem;
+    }
+  }
 </style>
 </head>
 <body>
